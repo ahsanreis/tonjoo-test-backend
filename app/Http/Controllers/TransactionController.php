@@ -25,7 +25,7 @@ class TransactionController extends Controller
         }
 
 
-        $this->validation();
+        // $this->validation();
         $this->saveData('create');
         return redirect()->route('landing-page');
     }
@@ -73,7 +73,7 @@ class TransactionController extends Controller
             return view('pages.edit-data-transaction', compact('transaction', 'categories'));
         }
 
-        $this->validation();
+        // $this->validation();
         $this->saveData('edit');
         return redirect()->route('landing-page');
     }
@@ -147,6 +147,24 @@ class TransactionController extends Controller
             if ($status === 'edit') {
                 $transactionData['created_at'] = now();
                 $transaction = Transaction::where('id', $this->request->input('id'))->update($transactionData);
+
+                $categories = $this->request->input('category');
+                foreach ($categories as $key => $category_id) {
+                    $names = collect($this->request->input('transaction_name')[$key]);
+                    $amounts = collect($this->request->input('amount')[$key]);
+                    $zipped = $names->zip($amounts);
+
+                    $finalRecords = $zipped->map(function ($item) use ($transaction, $category_id) {
+                        return [
+                            'transaction_category_id' => $category_id,
+                            'transaction_id' => $transaction->id,
+                            'name' => $item[0],
+                            'value_idr' => $item[1],
+                            'created_at' => now(),
+                        ];
+                    })->toArray();
+                    // TransactionDetail::findOrNew('')
+                }
             } else {
                 $transactionData['created_at'] = now();
                 $transaction = Transaction::create($transactionData);

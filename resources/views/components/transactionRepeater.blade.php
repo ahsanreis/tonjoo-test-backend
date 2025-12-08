@@ -6,8 +6,8 @@
                <label for="category-0" class="font-medium text-gray-700">Category</label>
                <select id="category-0" name="category[0]" class="p-2 border border-gray-300 rounded-md" required>
                     <option value="" disabled selected>Pilih Kategori</option>
-                    <option value="1">Income</option>
-                    <option value="2">Expense</option>
+                    <option value="1" {{ isset($detail) && $detail->transaction_category_id == 1 ? 'selected' : '' }}>Income</option>
+                    <option value="2" {{ isset($detail) && $detail->transaction_category_id == 2 ? 'selected' : '' }}>Expense</option>
                </select>
           </div>
 

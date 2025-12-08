@@ -21,6 +21,7 @@
                </div>
           </main>
      </div>
+     @flasher_render
      @stack('scripts')
 </body>
 
