@@ -1,4 +1,4 @@
-<div id="repeater-container" class="space-y-6 ">
+<div id="repeater-container" class="space-y-6">
      <div class="transaction-group border border-gray-300 rounded-lg p-4 bg-white shadow-md space-y-4">
           <h3 class="text-xl font-bold border-b pb-2 mb-4 text-gray-700">Grup #1</h3>
 
@@ -6,8 +6,8 @@
                <label for="category-0" class="font-medium text-gray-700">Category</label>
                <select id="category-0" name="category[0]" class="p-2 border border-gray-300 rounded-md" required>
                     <option value="" disabled selected>Pilih Kategori</option>
-                    <option value="income">Income</option>
-                    <option value="expense">Expense</option>
+                    <option value="1">Income</option>
+                    <option value="2">Expense</option>
                </select>
           </div>
 

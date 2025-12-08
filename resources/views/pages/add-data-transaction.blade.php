@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Tambah Data Transaksi')
 @section('content')
-<form action="post">
+<form action="{{ route('data-transaction') }}" method="POST" class="space-y-6">
      @csrf
      <div class="flex justify-between gap-4">
           <div class="flex flex-col w-1/2">
@@ -13,13 +13,13 @@
                     <label for="code" class="w-1/4 font-medium text-gray-700">Code:</label>
                     <input type="number" id="code" name="code" class="w-3/4 p-2 border border-gray-300 rounded-md" required>
                </div>
-               <div class="flex">
+               <div class="flex mt-4">
                     <label for="rate_euro" class="w-1/4 font-medium text-gray-700">Rate Euro:</label>
                     <input type="number" id="rate_euro" name="rate_euro" class="w-3/4 p-2 border border-gray-300 rounded-md" required>
                </div>
-               <div class="flex">
-                    <label for="date_period" class="w-1/4 font-medium text-gray-700">Date Period:</label>
-                    <input type="date" id="date_period" name="date_period" class="w-3/4 p-2 border border-gray-300 rounded-md" required>
+               <div class="flex mt-4">
+                    <label for="date_paid" class="w-1/4 font-medium text-gray-700">Date Period:</label>
+                    <input type="date" id="date_paid" name="date_paid" class="w-3/4 p-2 border border-gray-300 rounded-md" required>
                </div>
           </div>
      </div>
@@ -32,26 +32,34 @@
           </div>
           @include('components.transactionRepeater')
      </div>
+     <div class="text-right mt-6">
+          <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded-lg text-lg font-semibold hover:bg-green-700 shadow-lg transition duration-150">
+               Simpan
+          </button>
+          <a href="{{ route('landing-page') }}" class="bg-red-600 text-white px-6 py-2 rounded-lg text-lg font-semibold hover:bg-red-700 shadow-lg transition duration-150">
+               Batal
+          </a>
+     </div>
 </form>
 @endsection
 @pushOnce('scripts')
 <script>
      //! Javascript to handle entire repeat Transaction data
      document.addEventListener('DOMContentLoaded', () => {
+          // Get Container of Repeater Component and Add Button
           const repeaterContainer = document.getElementById('repeater-container');
           const addGroupButton = document.getElementById('add-group-btn');
 
-          // 1. Get the template of the entire group to be cloned
-          // Use the outerHTML of the first .transaction-group element
+          // Set Which The One that will be Cloned
           const initialGroup = repeaterContainer.querySelector('.transaction-group');
-          const groupTemplate = initialGroup.outerHTML;
+          const groupTemplate = initialGroup.innerHTML;
 
           // Counter to maintain unique names (important for Laravel/backend)
           let groupIndex = 1; // Start at 1 since the initial group is 0
 
           // Function to attach all event listeners for 'Tambah Item' and 'Hapus'
           const attachGroupListeners = (groupElement, index) => {
-               // --- Inner Row Repeater Logic ---
+               // Inner Row Repeater Logic
                const addRowBtn = groupElement.querySelector('.add-row-btn');
                const tableBody = groupElement.querySelector('.transaction-rows');
                const rowTemplate = tableBody.querySelector('.transaction-row-template').outerHTML;
@@ -70,7 +78,7 @@
                     attachRemoveRowListeners(groupElement);
                });
 
-               // --- Remove Row Logic ---
+               // Remove Row Logic
                const attachRemoveRowListeners = (group) => {
                     // Select only buttons within THIS specific group
                     const removeButtons = group.querySelectorAll('.remove-row-btn');
@@ -89,7 +97,7 @@
                     });
                };
 
-               // --- Remove Group Logic ---
+               // Remove Group Logic
                const removeGroupBtn = groupElement.querySelector('.remove-group-btn');
                removeGroupBtn.addEventListener('click', (e) => {
                     e.target.closest('.transaction-group').remove();
@@ -101,7 +109,7 @@
           attachGroupListeners(initialGroup, 0);
 
 
-          // --- Global Group Repeater Logic ---
+          // Global Group Repeater Logic
           addGroupButton.addEventListener('click', () => {
                // Create the new group element
                const newGroup = document.createElement('div');
@@ -136,47 +144,9 @@
                repeaterContainer.appendChild(newGroup);
                attachGroupListeners(newGroup, groupIndex);
                groupIndex++;
+
           });
 
-     });
-</script>
-<script>
-     //! JavaScript to handle adding and removing transaction rows at the table level
-     document.addEventListener('DOMContentLoaded', () => {
-          const addButton = document.getElementById('add-transaction-btn');
-          const tableBody = document.getElementById('transaction-rows');
-          // Get the HTML of the first row to use as a template
-          const templateRowHtml = tableBody.querySelector('tr').outerHTML;
-
-          addButton.addEventListener('click', () => {
-               // Create a new row element from the template
-               const newRow = document.createElement('tr');
-               newRow.innerHTML = templateRowHtml;
-
-               // Append the new row to the table body
-               tableBody.appendChild(newRow);
-
-               // Re-attach listeners to all 'Hapus' buttons (including the new one)
-               attachRemoveListeners();
-          });
-
-          function attachRemoveListeners() {
-               // Select all 'Hapus' buttons
-               const removeButtons = document.querySelectorAll('.remove-row-btn');
-
-               removeButtons.forEach(button => {
-                    // Remove any existing listeners to prevent duplicates
-                    button.onclick = null;
-
-                    button.onclick = (e) => {
-                         // Find the closest <tr> element (the row) and remove it
-                         e.target.closest('tr').remove();
-                    };
-               });
-          }
-
-          // Call once to enable removal of the initial row
-          attachRemoveListeners();
      });
 </script>
 @endPushOnce

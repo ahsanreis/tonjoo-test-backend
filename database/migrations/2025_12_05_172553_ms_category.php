@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('ms_categories', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->nullable();
+            $table->enum('name', ['expense', 'income'])->nullable();
             $table->timestamps();
         });
     }
@@ -23,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('ms_categories');
     }
 };
