@@ -8,6 +8,8 @@ use App\Models\TransactionDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+use function PHPUnit\Framework\isNull;
+
 class TransactionController extends Controller
 {
     protected $request;
@@ -30,9 +32,37 @@ class TransactionController extends Controller
 
     public function list()
     {
-        // dd($this->request->all());
-        $transaction_details = TransactionDetail::with(['transaction', 'category'])->orderBy('created_at', 'desc')->paginate(10);
-        return view('pages.list-data-transaction', compact('transaction_details'));
+        $filters = [];
+        $transaction_details = TransactionDetail::query();
+        $transaction_details->with(['transaction', 'category']);
+
+        if ($this->request->has('date-start') && $this->request->input('date-start') != null) {
+            $filters['date-start'] = $this->request->input('date-start');
+            $transaction_details->whereHas('transaction', function ($query) use ($filters) {
+                $query->whereDate('date_paid', '>=', $filters['date-start']);
+            });
+        }
+        if ($this->request->has('date-end') && $this->request->input('date-end') != null) {
+            $filters['date-end'] = $this->request->input('date-end');
+            $transaction_details->whereHas('transaction', function ($query) use ($filters) {
+                $query->whereDate('date_paid', '<=', $filters['date-end']);
+            });
+        }
+        if ($this->request->has('category') && $this->request->input('category') != null || $this->request->input('category') != '') {
+            $filters['category'] = $this->request->input('category');
+            $transaction_details->where('transaction_category_id', $filters['category']);
+        }
+        if ($this->request->has('search') && $this->request->input('search') != null || $this->request->input('search') != '') {
+            $filters['search'] = $this->request->input('search');
+            $transaction_details->whereHas('transaction', function ($query) use ($filters) {
+                $query->where('description', 'like', '%' . $filters['search'] . '%')
+                    ->orWhere('code', 'like', '%' . $filters['search'] . '%');
+            });
+        }
+
+        $transaction_details = $transaction_details->paginate(10);
+
+        return view('pages.list-data-transaction', compact('transaction_details', 'filters'));
     }
 
     public function edit()
@@ -46,6 +76,24 @@ class TransactionController extends Controller
         $this->validation();
         $this->saveData('edit');
         return redirect()->route('landing-page');
+    }
+
+    public function delete($transaction_id)
+    {
+        DB::beginTransaction();
+        try {
+            TransactionDetail::where('transaction_id', $transaction_id)->delete();
+            $count = TransactionDetail::where('transaction_id', $transaction_id)->count();
+            if ($count == 0) {
+                Transaction::where('id', $transaction_id)->delete();
+            }
+
+            DB::commit();
+            return redirect()->route('list-data-transaction')->with('success', 'Data transaksi berhasil dihapus.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['msg' => 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage()]);
+        }
     }
 
     private function validation()

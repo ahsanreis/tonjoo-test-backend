@@ -7,15 +7,15 @@
      </a>
      <form action="{{ route('list-data-transaction') }}" method="get" class="filters inline-flex justify-between items-center space-x-4 mt-4 min-w-full">
           <a href="javascript:void(0);" id="reset-filter" class="bg-red-600 text-white px-6 py-2 rounded-lg text-lg font-semibold hover:bg-red-700 shadow-lg transition duration-150">Reset</a>
-          <input type="date" id="filter-date-start" class="p-2 border border-gray-300 rounded-md">
+          <input type="date" id="filter-date-start" name="date-start" class="p-2 border border-gray-300 rounded-md" value="{{ isset($filters['date-start']) ? $filters['date-start'] : '' }}">
           <p>to</p>
-          <input type="date" id="filter-date-end" class="p-2 border border-gray-300 rounded-md">
+          <input type="date" id="filter-date-end" name="date-end" class="p-2 border border-gray-300 rounded-md" value="{{ isset($filters['date-end']) ? $filters['date-end'] : '' }}">
           <select name="category" id="category" class="border border-gray-300 rounded-md p-2">
-               <option value="">All Categories</option>
-               <option value="1">Income</option>
-               <option value="2">Expense</option>
+               <option value="" disabled selected>All Categories</option>
+               <option value="1" {{ isset($filters['category']) && $filters['category'] == 1 ? 'selected' : '' }}>Income</option>
+               <option value="2" {{ isset($filters['category']) && $filters['category'] == 2 ? 'selected' : '' }}>Expense</option>
           </select>
-          <input type="text" class="search border border-gray-600 rounded-md p-2" placeholder="Search..." name="search">
+          <input type="text" class="search border border-gray-600 rounded-md p-2" placeholder="Search..." name="search" value="{{ isset($filters['search']) ? $filters['search'] : '' }}">
           <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-lg font-semibold hover:bg-blue-700 shadow-lg transition duration-150">Apply Filter</button>
      </form>
 </div>
@@ -48,7 +48,7 @@
                     <td class="border px-4 py-2">
                          <a href="{{ route('edit-data-transaction', ['id' => $transaction_detail->transaction->id]) }}" class="text-blue-600 hover:underline">Edit</a>
                          |
-                         <form action="#" method="POST" class="inline">
+                         <form action="{{ route('delete-data-transaction', ['transaction_id' => $transaction_detail->transaction->id]) }}" method="POST" class="inline">
                               @csrf
                               @method('DELETE')
                               <button type="submit" class="text-red-600 hover:underline" onclick="return confirm('Are you sure you want to delete this transaction?')">Delete</button>
